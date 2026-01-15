@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>SRT ↔ SMI 자막 변환기</title>
+<title>통합 자막 변환기</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,9 +11,9 @@
 <div class="wrapper">
   <div class="card">
 
-    <h1>SRT ↔ SMI 자막 변환기</h1>
+    <h1>통합 자막 변환기</h1>
     <div class="subtitle">
-      무료 온라인 자막 변환 도구 · 서버에 파일 저장 안 함
+      SMI, SRT, IDX+SUB 지원 · 서버에 파일 저장 안 함
     </div>
 
     <div class="steps">
@@ -25,8 +25,8 @@
 
     <div class="dropzone" id="dropzone">
       <strong>파일을 선택하세요</strong>
-      <small>또는 여기로 드래그하세요 (.srt, .smi)</small>
-      <input type="file" id="files" multiple accept=".srt,.smi">
+      <small>여러 파일 동시 선택 가능 (.srt, .smi, .idx, .sub)</small>
+      <input type="file" id="files" multiple accept=".srt,.smi,.idx,.sub">
     </div>
 
     <div class="options">
@@ -37,6 +37,10 @@
       <label class="option">
         <input type="radio" name="mode" value="srt2smi">
         SRT → SMI
+      </label>
+      <label class="option">
+        <input type="radio" name="mode" value="idx2srt">
+        IDX+SUB → SRT
       </label>
     </div>
 
@@ -68,7 +72,7 @@ dropzone.addEventListener('drop', e => {
   fileInput.files = e.dataTransfer.files;
 });
 
-/* 옵션 선택 */
+/* 옵션 선택 UI 처리 */
 document.querySelectorAll('.option').forEach(opt => {
   opt.addEventListener('click', () => {
     document.querySelectorAll('.option').forEach(o => o.classList.remove('active'));
@@ -77,14 +81,14 @@ document.querySelectorAll('.option').forEach(opt => {
   });
 });
 
-/* 변환 */
+/* 변환 요청 */
 document.getElementById('start').addEventListener('click', async () => {
   if (!fileInput.files.length) {
     alert('파일을 선택하세요');
     return;
   }
 
-  log.textContent = '변환 시작...\n';
+  log.textContent = '업로드 및 변환 시작...\n(IDX변환은 시간이 걸릴 수 있습니다)\n';
 
   const formData = new FormData();
   [...fileInput.files].forEach(f => formData.append('files[]', f));
@@ -93,19 +97,28 @@ document.getElementById('start').addEventListener('click', async () => {
     document.querySelector('input[name="mode"]:checked').value
   );
 
-  const res = await fetch('upload.php', {
-    method: 'POST',
-    body: formData
-  });
+  try {
+    const res = await fetch('upload.php', {
+      method: 'POST',
+      body: formData
+    });
 
-  const data = await res.json();
-  data.logs.forEach(l => log.textContent += l + '\n');
+    const data = await res.json();
+    
+    // 로그 초기화 후 출력
+    log.textContent = '';
+    if (data.logs) {
+        data.logs.forEach(l => log.textContent += l + '\n');
+    }
 
-  if (data.success) {
-    log.textContent += '완료\n';
-    window.location = data.zip;
-  } else {
-    log.textContent += '실패\n';
+    if (data.success && data.zip) {
+      log.textContent += '완료! 다운로드를 시작합니다.\n';
+      window.location = data.zip;
+    } else {
+      log.textContent += '변환 실패 또는 경고가 있습니다.\n';
+    }
+  } catch (err) {
+    log.textContent += '서버 통신 오류: ' + err.message + '\n';
   }
 });
 </script>
