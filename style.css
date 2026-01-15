@@ -1,13 +1,48 @@
+:root {
+  /* 라이트 모드 (기본) */
+  --bg-body: #f6f7fb;
+  --bg-card: #ffffff;
+  --text-main: #1f2937;
+  --text-sub: #6b7280;
+  --border-color: #e5e7eb;
+  --primary: #4f7cff;
+  --primary-hover: #3f69e0;
+  --drop-bg: #f8faff;
+  --drop-drag: #eef2ff;
+  --option-active-bg: #f0f4ff;
+  --log-bg: #f9fafb;
+  --step-bg: #e5e7eb;
+  --step-text: #6b7280;
+}
+
+/* 다크 모드 */
+html[data-theme="dark"] {
+  --bg-body: #111827;
+  --bg-card: #1f2937;
+  --text-main: #f3f4f6;
+  --text-sub: #9ca3af;
+  --border-color: #374151;
+  --primary: #638aff;
+  --primary-hover: #82a0ff;
+  --drop-bg: #374151;
+  --drop-drag: #4b5563;
+  --option-active-bg: #374151;
+  --log-bg: #111827;
+  --step-bg: #4b5563;
+  --step-text: #9ca3af;
+}
+
 * {
   box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
                "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  background: #f6f7fb;
-  color: #1f2937;
+  background: var(--bg-body);
+  color: var(--text-main);
 }
 
 .wrapper {
@@ -17,21 +52,46 @@ body {
 }
 
 .card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+  position: relative; /* 버튼 배치를 위해 기준점 설정 */
+}
+
+/* 테마 토글 버튼 (카드 내부 우측 상단 배치) */
+.theme-toggle-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-sub);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10; /* 확실하게 위에 오도록 설정 */
+}
+
+.theme-toggle-btn:hover {
+  background: var(--border-color);
+  color: var(--text-main);
 }
 
 h1 {
   text-align: center;
   margin-bottom: 8px;
   font-size: 28px;
+  color: var(--text-main);
 }
 
 .subtitle {
   text-align: center;
-  color: #6b7280;
+  color: var(--text-sub);
   font-size: 14px;
   margin-bottom: 30px;
 }
@@ -56,7 +116,7 @@ h1 {
   right: -50%;
   width: 100%;
   height: 2px;
-  background: #e5e7eb;
+  background: var(--border-color);
 }
 
 .step span {
@@ -66,20 +126,20 @@ h1 {
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  background: #e5e7eb;
-  color: #6b7280;
+  background: var(--step-bg);
+  color: var(--step-text);
   font-weight: 600;
 }
 
 .step.active span {
-  background: #4f7cff;
+  background: var(--primary);
   color: #fff;
 }
 
 .step p {
   margin-top: 8px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-sub);
 }
 
 /* Dropzone */
@@ -88,27 +148,29 @@ h1 {
   border-radius: 14px;
   padding: 50px 20px;
   text-align: center;
-  background: #f8faff;
+  background: var(--drop-bg);
   transition: 0.2s;
 }
 
 .dropzone.dragover {
-  background: #eef2ff;
-  border-color: #4f7cff;
+  background: var(--drop-drag);
+  border-color: var(--primary);
 }
 
 .dropzone strong {
   font-size: 16px;
+  color: var(--text-main);
 }
 
 .dropzone small {
   display: block;
   margin-top: 6px;
-  color: #6b7280;
+  color: var(--text-sub);
 }
 
 .dropzone input {
   margin-top: 16px;
+  color: var(--text-sub);
 }
 
 /* Options */
@@ -120,17 +182,20 @@ h1 {
 
 .option {
   flex: 1;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
   text-align: center;
   cursor: pointer;
   transition: 0.2s;
+  color: var(--text-main);
 }
 
 .option.active {
-  border-color: #4f7cff;
-  background: #f0f4ff;
+  border-color: var(--primary);
+  background: var(--option-active-bg);
+  color: var(--primary);
+  font-weight: bold;
 }
 
 .option input {
@@ -143,8 +208,8 @@ h1 {
   margin-top: 30px;
 }
 
-button {
-  background: #4f7cff;
+button#start {
+  background: var(--primary);
   color: #fff;
   border: none;
   padding: 14px 40px;
@@ -153,14 +218,16 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background: #3f69e0;
+button#start:hover {
+  background: var(--primary-hover);
 }
 
 /* Log */
 #log {
   margin-top: 30px;
-  background: #f9fafb;
+  background: var(--log-bg);
+  color: var(--text-sub);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px;
   height: 200px;

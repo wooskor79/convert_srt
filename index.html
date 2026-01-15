@@ -11,6 +11,10 @@
 <div class="wrapper">
   <div class="card">
 
+    <button id="theme-toggle" class="theme-toggle-btn">
+      <span>🌙</span> 모드 변경
+    </button>
+
     <h1>통합 자막 변환기</h1>
     <div class="subtitle">
       SMI, SRT, IDX+SUB 지원 · 서버에 파일 저장 안 함
@@ -54,6 +58,49 @@
 </div>
 
 <script>
+/* -----------------------------------------------------------
+   1. 다크 모드 로직 (저장 기능 포함)
+----------------------------------------------------------- */
+const themeToggleBtn = document.getElementById('theme-toggle');
+const htmlEl = document.documentElement;
+
+// 초기 테마 설정
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  // 저장된 값이 있으면 우선 사용, 없으면 시스템 설정 확인
+  let theme = savedTheme ? savedTheme : (systemDark ? 'dark' : 'light');
+  applyTheme(theme);
+}
+
+// 테마 적용 함수
+function applyTheme(theme) {
+  htmlEl.setAttribute('data-theme', theme);
+  
+  if (theme === 'dark') {
+    themeToggleBtn.innerHTML = '<span>☀️</span> 라이트 모드';
+  } else {
+    themeToggleBtn.innerHTML = '<span>🌙</span> 다크 모드';
+  }
+}
+
+// 버튼 클릭 이벤트
+themeToggleBtn.addEventListener('click', () => {
+  const current = htmlEl.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  
+  applyTheme(next);
+  localStorage.setItem('theme', next);
+});
+
+// 실행
+initTheme();
+
+
+/* -----------------------------------------------------------
+   2. 파일 업로드 및 변환 로직
+----------------------------------------------------------- */
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('files');
 const log = document.getElementById('log');
@@ -72,7 +119,7 @@ dropzone.addEventListener('drop', e => {
   fileInput.files = e.dataTransfer.files;
 });
 
-/* 옵션 선택 UI 처리 */
+/* 옵션 UI */
 document.querySelectorAll('.option').forEach(opt => {
   opt.addEventListener('click', () => {
     document.querySelectorAll('.option').forEach(o => o.classList.remove('active'));
@@ -98,18 +145,11 @@ document.getElementById('start').addEventListener('click', async () => {
   );
 
   try {
-    const res = await fetch('upload.php', {
-      method: 'POST',
-      body: formData
-    });
-
+    const res = await fetch('upload.php', { method: 'POST', body: formData });
     const data = await res.json();
     
-    // 로그 초기화 후 출력
     log.textContent = '';
-    if (data.logs) {
-        data.logs.forEach(l => log.textContent += l + '\n');
-    }
+    if (data.logs) data.logs.forEach(l => log.textContent += l + '\n');
 
     if (data.success && data.zip) {
       log.textContent += '완료! 다운로드를 시작합니다.\n';
